@@ -1,0 +1,57 @@
+---
+  - name: General tasks
+    hosts: all
+    become: true
+    pre_tasks:
+    - name: Install packages
+      apt:
+        name:
+        - iperf3
+        - openvpn
+        state: present
+        update_cache: true
+        cache_valid_time: 7200
+    - name: Copy unit file
+      template:
+        src: openvpn@service
+        dest: /etc/systemd/system
+
+  - name: VPN-server setup
+    hosts: server
+    become: true
+    tasks:
+    - name: Generate key
+      shell: openvpn --genkey --secret /etc/openvpn/static.key
+    - name: Copy key
+      fetch:
+        src: /etc/openvpn/static.key
+        dest: ./templates/
+        flat: yes
+    - name: Copy config file
+      template:
+        src: server_tun.conf
+        dest: /etc/openvpn/server.conf
+    - name: Start VPN service
+      service:
+        name: openvpn@server
+        state: started
+        enabled: true
+
+  - name: VPN-client setup
+    hosts: client
+    become: true
+    tasks:
+    - name: Copy config file
+      template:
+        src: client_tun.conf
+        dest: /etc/openvpn/server.conf
+    - name: Copy key
+      template:
+        src: static.key
+        dest: /etc/openvpn
+    - name: Start VPN service
+      service:
+        name: openvpn@server
+        state: started
+        enabled: true
+    
