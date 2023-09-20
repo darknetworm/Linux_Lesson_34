@@ -1,0 +1,52 @@
+---
+  - name: General tasks
+    hosts: server
+    become: true
+    tasks:
+    - name: Install packages
+      apt:
+        name:
+        - easy-rsa
+        - openvpn
+        state: present
+        update_cache: true
+        cache_valid_time: 7200
+    - name: Copy unit file
+      template:
+        src: openvpn@service
+        dest: /etc/systemd/system
+    - name: Copy config file
+      template:
+        src: server_ras.conf
+        dest: /etc/openvpn/server.conf
+    - name: Initializing pki
+      shell: |
+        cd /etc/openvpn
+        /usr/share/easy-rsa/easyrsa init-pki
+        echo 'rasvpn' | /usr/share/easy-rsa/easyrsa build-ca nopass
+        echo 'rasvpn' | /usr/share/easy-rsa/easyrsa gen-req server nopass
+        echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req server server
+        /usr/share/easy-rsa/easyrsa gen-dh
+        openvpn --genkey --secret ca.key
+        echo 'client' | /usr/share/easy-rsa/easyrsa gen-req client nopass
+        echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req client client
+    - name: Copy ca file
+      fetch:
+        src: /etc/openvpn/pki/ca.crt
+        dest: ./client/
+        flat: yes
+    - name: Copy client cert
+      fetch:
+        src: /etc/openvpn/pki/issued/client.crt
+        dest: ./client/
+        flat: yes
+    - name: Copy client key
+      fetch:
+        src: /etc/openvpn/pki/private/client.key
+        dest: ./client/
+        flat: yes
+    - name: Start VPN service
+      service:
+        name: openvpn@server
+        state: started
+        enabled: true
