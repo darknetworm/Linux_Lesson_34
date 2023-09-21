@@ -1,8 +1,10 @@
 ---
+#Основные задачи
   - name: General tasks
     hosts: server
     become: true
     tasks:
+#Установка необходимых пакетов
     - name: Install packages
       apt:
         name:
@@ -11,14 +13,17 @@
         state: present
         update_cache: true
         cache_valid_time: 7200
+#Копирование на сервер сервиса OpenVPN
     - name: Copy unit file
       template:
         src: openvpn@service
         dest: /etc/systemd/system
+#Копирование на сервер конфигурационного файла
     - name: Copy config file
       template:
         src: server_ras.conf
         dest: /etc/openvpn/server.conf
+#Настройка и генерирование сертификатов и ключей
     - name: Initializing pki
       shell: |
         cd /etc/openvpn
@@ -30,21 +35,25 @@
         openvpn --genkey --secret ca.key
         echo 'client' | /usr/share/easy-rsa/easyrsa gen-req client nopass
         echo 'yes' | /usr/share/easy-rsa/easyrsa sign-req client client
+#Копирование сертификат центра сертификации на хост-машину
     - name: Copy ca file
       fetch:
         src: /etc/openvpn/pki/ca.crt
         dest: ./client/
         flat: yes
+#Копирование клиентского сертификата на хост-машину
     - name: Copy client cert
       fetch:
         src: /etc/openvpn/pki/issued/client.crt
         dest: ./client/
         flat: yes
+#Копирование клиентского ключа на хост-машину
     - name: Copy client key
       fetch:
         src: /etc/openvpn/pki/private/client.key
         dest: ./client/
         flat: yes
+#Запускаем сервис OpenVPN
     - name: Start VPN service
       service:
         name: openvpn@server
