@@ -53,7 +53,7 @@
         src: /etc/openvpn/pki/private/client.key
         dest: ./client/
         flat: yes
-#Запускаем сервис OpenVPN
+#Запуск сервиса OpenVPN
     - name: Start VPN service
       service:
         name: openvpn@server
