@@ -18,10 +18,10 @@
 ### Проверка работоспособности стенда
 
 Для проверки работоспособности VPN-соединения в режиме tap и tun использовалась утилита ping и для проверки пропускной спопосбности канала - iperf3.
-![tap](https://github.com/darknetworm/Linux_Lesson_34/assets/82410807/1343cd31-010e-481c-acad-c1dd990e8148)  
-Режим tap.
-![tun](https://github.com/darknetworm/Linux_Lesson_34/assets/82410807/42aa130f-6e39-4606-9c85-dc0dd0004fa9)  
 Режим tun.  
+![tap](https://github.com/darknetworm/Linux_Lesson_34/assets/82410807/1343cd31-010e-481c-acad-c1dd990e8148)  
+Режим tap.  
+![tun](https://github.com/darknetworm/Linux_Lesson_34/assets/82410807/42aa130f-6e39-4606-9c85-dc0dd0004fa9)  
 
 Из-за "слабой" конфигурации ПК, на котором снимались скриншоты, разница между двумя режимами практически не различима. На более мощном ПК результаты iperf в режиме tap значительнот превосходили результаты в режиме tun, т.к. tap работает на канальном уровне, а tun - на сетевом.
 
